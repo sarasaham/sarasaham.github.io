@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SARA AI - Performa Keuntungan 10 Tahun (Bulanan)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      background-color: #030712;
+      color: #f3f4f6;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Custom Scrollbar untuk list transaksi */
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    /* Gaya untuk Kotak Tooltip Putih Kustom */
+    #chart-tooltip {
+      opacity: 0;
+      position: absolute;
+      background: white;
+      color: #0b1329;
+      border-radius: 8px;
+      padding: 12px 16px;
+      pointer-events: none;
+      transition: all 0.08s ease;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+      z-index: 50;
+      min-width: 200px;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+
+<body class="p-4 md:p-8 min-h-screen flex items-center justify-center">
+
+  <div class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <div
+      class="lg:col-span-2 bg-[#0b1329] p-6 rounded-xl border border-gray-800/60 shadow-2xl flex flex-col justify-between relative">
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-chart-line text-emerald-400 text-xl"></i>
+            <h2 class="text-xl font-bold tracking-wide text-white">Performa Keuntungan</h2>
+          </div>
+          <div class="flex flex-wrap gap-2 text-[11px] font-bold">
+            <span class="bg-[#1e293b]/60 text-[#4ade80] px-3 py-1 rounded-full border border-emerald-500/20">YTD:
+              +18,83%</span>
+            <span class="bg-[#1e293b]/60 text-[#4ade80] px-3 py-1 rounded-full border border-emerald-500/20">3Y:
+              +86,11%</span>
+            <span class="bg-[#1e293b]/60 text-[#4ade80] px-3 py-1 rounded-full border border-emerald-500/20">5Y:
+              +617,77%</span>
+            <span class="bg-[#1e293b]/60 text-[#4ade80] px-3 py-1 rounded-full border border-emerald-500/20">10Y:
+              +4.947,06%</span>
+          </div>
+        </div>
+
+        <div
+          class="bg-[#1e293b]/40 border border-blue-500/10 rounded-lg p-3 text-xs md:text-sm text-gray-300 mb-6 flex items-start gap-2">
+          <i class="fa-regular fa-lightbulb text-amber-400 mt-0.5"></i>
+          <p>Analisa performa <span class="text-blue-400 font-semibold">SARA AI</span> dibandingkan dengan <span
+              class="text-purple-400 font-semibold">ADRO</span> dan <span class="text-red-400 font-semibold">IHSG</span>
+            dengan basis data <span class="text-emerald-400 font-semibold">Per Bulan (2016 - 2026)</span>.</p>
+        </div>
+
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-4 text-xs md:text-sm font-semibold text-gray-300">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              <span>SARA AI</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+              <span>ADRO</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+              <span>IHSG</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 text-xs md:text-sm text-gray-400">
+            <span>Periode Waktu:</span>
+            <select
+              class="bg-[#111827] border border-gray-700 text-white rounded-md px-2 py-1 focus:outline-none cursor-pointer text-xs">
+              <option>Per Bulan (10 Thn)</option>
+              <option>1 Tahun</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative w-full h-[360px] mt-4 bg-[#111827]/30 rounded-lg p-2">
+        <canvas id="performanceChart"></canvas>
+        <div id="chart-tooltip"></div>
+      </div>
+    </div>
+
+    <div class="bg-[#0b1329] p-6 rounded-xl border border-gray-800/60 shadow-2xl flex flex-col justify-between">
+      <div>
+        <div class="grid grid-cols-2 gap-2 mb-4 bg-[#111827] p-1 rounded-lg text-xs text-center">
+          <button class="bg-[#1e293b] text-white py-2 rounded-md font-semibold flex items-center justify-center gap-2">
+            <i class="fa-solid fa-history"></i> 5 Transaksi Terakhir
+          </button>
+          <button
+            class="text-gray-400 hover:text-white py-2 rounded-md font-semibold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-calculator"></i> Kalkulator
+          </button>
+        </div>
+
+        <div
+          class="bg-[#1e293b]/40 border border-blue-500/10 rounded-lg p-2.5 text-[11px] text-gray-300 mb-4 flex items-start gap-2">
+          <i class="fa-regular fa-lightbulb text-amber-400 mt-0.5"></i>
+          <p>Transaksi terakhir berdasarkan sinyal <span class="text-blue-400 font-semibold">SARA AI</span> untuk saham
+            <span class="font-semibold text-white">ADRO</span>.</p>
+        </div>
+
+        <div class="space-y-2.5 overflow-y-auto max-h-[380px] pr-1 custom-scroll">
+
+          <div
+            class="bg-[#111827]/70 border border-gray-800/50 p-3 rounded-xl flex items-center justify-between hover:border-red-500/30 transition">
+            <div class="text-center min-w-[75px]">
+              <p class="text-[11px] text-gray-500 font-black">#5</p>
+              <span class="text-red-500 font-extrabold text-base flex items-center justify-center gap-0.5">
+                <i class="fa-solid fa-arrow-trend-down text-xs"></i> -2,98%
+              </span>
+            </div>
+            <div class="text-right text-[11px] grid grid-cols-2 gap-x-4">
+              <div>
+                <p class="text-gray-500">Tanggal Beli:</p>
+                <p class="text-gray-300 font-semibold">25 Mei 2026</p>
+                <p class="text-white font-bold mt-0.5">Rp 2.350</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Tanggal Jual:</p>
+                <p class="text-gray-300 font-semibold">3 Juni 2026</p>
+                <p class="text-white font-bold mt-0.5">Rp 2.280</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-[#111827]/70 border border-gray-800/50 p-3 rounded-xl flex items-center justify-between hover:border-red-500/30 transition">
+            <div class="text-center min-w-[75px]">
+              <p class="text-[11px] text-gray-500 font-black">#4</p>
+              <span class="text-red-500 font-extrabold text-base flex items-center justify-center gap-0.5">
+                <i class="fa-solid fa-arrow-trend-down text-xs"></i> -1,78%
+              </span>
+            </div>
+            <div class="text-right text-[11px] grid grid-cols-2 gap-x-4">
+              <div>
+                <p class="text-gray-500">Tanggal Beli:</p>
+                <p class="text-gray-300 font-semibold">19 Feb 2026</p>
+                <p class="text-white font-bold mt-0.5">Rp 2.250</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Tanggal Jual:</p>
+                <p class="text-gray-300 font-semibold">22 Mei 2026</p>
+                <p class="text-white font-bold mt-0.5">Rp 2.210</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-[#111827]/70 border border-gray-800/50 p-3 rounded-xl flex items-center justify-between hover:border-emerald-500/30 transition">
+            <div class="text-center min-w-[75px]">
+              <p class="text-[11px] text-gray-500 font-black">#3</p>
+              <span class="text-[#4ade80] font-extrabold text-base flex items-center justify-center gap-0.5">
+                <i class="fa-solid fa-arrow-trend-up text-xs"></i> +2,3%
+              </span>
+            </div>
+            <div class="text-right text-[11px] grid grid-cols-2 gap-x-4">
+              <div>
+                <p class="text-gray-500">Tanggal Beli:</p>
+                <p class="text-gray-300 font-semibold">11 Feb 2026</p>
+                <p class="text-white font-bold mt-0.5">Rp 2.170</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Tanggal Jual:</p>
+                <p class="text-gray-300 font-semibold">12 Feb 2026</p>
+                <p class="text-white font-bold mt-0.5">Rp 2.220</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-[#111827]/70 border border-gray-800/50 p-3 rounded-xl flex items-center justify-between hover:border-emerald-500/30 transition">
+            <div class="text-center min-w-[75px]">
+              <p class="text-[11px] text-gray-500 font-black">#2</p>
+              <span class="text-[#4ade80] font-extrabold text-base flex items-center justify-center gap-0.5">
+                <i class="fa-solid fa-arrow-trend-up text-xs"></i> +5,24%
+              </span>
+            </div>
+            <div class="text-right text-[11px] grid grid-cols-2 gap-x-4">
+              <div>
+                <p class="text-gray-500">Tanggal Beli:</p>
+                <p class="text-gray-300 font-semibold">12 Jan 2026</p>
+                <p class="text-white font-bold mt-0.5">Rp 2.100</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Tanggal Jual:</p>
+                <p class="text-gray-300 font-semibold">29 Jan 2026</p>
+                <p class="text-white font-bold mt-0.5">Rp 2.210</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-[#111827]/70 border border-gray-800/50 p-3 rounded-xl flex items-center justify-between hover:border-emerald-500/30 transition">
+            <div class="text-center min-w-[75px]">
+              <p class="text-[11px] text-gray-500 font-black">#1</p>
+              <span class="text-[#4ade80] font-extrabold text-base flex items-center justify-center gap-0.5">
+                <i class="fa-solid fa-arrow-trend-up text-xs"></i> +1%
+              </span>
+            </div>
+            <div class="text-right text-[11px] grid grid-cols-2 gap-x-4">
+              <div>
+                <p class="text-gray-500">Tanggal Beli:</p>
+                <p class="text-gray-300 font-semibold">8 Jan 2026</p>
+                <p class="text-white font-bold mt-0.5">Rp 2.010</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Tanggal Jual:</p>
+                <p class="text-gray-300 font-semibold">9 Jan 2026</p>
+                <p class="text-white font-bold mt-0.5">Rp 2.030</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    const tooltipEl = document.getElementById('chart-tooltip');
+
+    // --- GENERASI DATA BULANAN 10 TAHUN (2016-2026) ---
+    const startYear = 2016;
+    const endYear = 2026; // Data kumulatif s.d Juni 2026
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+
+    const labels = [];
+    const saraData = [];
+    const adroData = [];
+    const ihsgData = [];
+
+    // Tren Kumulatif Simulasi agar mirip gambar asli
+    let cumSara = 10;
+    let cumAdro = 25;
+    let cumIhsg = 5;
+
+    for (let year = startYear; year <= endYear; year++) {
+      // Tahun 2026 hanya s.d bulan Juni
+      let limitMonth = (year === endYear) ? 5 : 11;
+
+      for (let month = 0; month <= limitMonth; month++) {
+        // Label format: "Bulan 'Thn" (contoh: Mar '23)
+        labels.push(`${months[month]} '${String(year).slice(-2)}`);
+
+        // --- LOGIKA SIMULASI TREN ---
+        // SARA AI: Tumbuh stabil, melonjak drastis setelah 2022
+        let factor = (year >= 2022) ? 1.05 + (Math.random() * 0.05) : 1.01 + (Math.random() * 0.02);
+        cumSara *= factor;
+
+        // Data khusus November 2025 (target semirip mungkin)
+        if (year === 2025 && month === 10) { cumSara = 4365.53; cumAdro = 151.39; cumIhsg = 75.81; }
+        // Data khusus akhir s.d Juni 2026
+        else if (year === 2026 && month === 5) { cumSara = 4947.06; cumAdro = 220.00; cumIhsg = 88.00; }
+        else {
+          // ADRO: Fluktuatif dengan kecenderungan naik lambat
+          cumAdro += (Math.random() - 0.45) * 4;
+          // IHSG: Tumbuh sangat lambat
+          cumIhsg += (Math.random() - 0.4) * 1.5;
+        }
+
+        saraData.push(parseFloat(cumSara.toFixed(2)));
+        adroData.push(parseFloat(cumAdro.toFixed(2)));
+        ihsgData.push(parseFloat(cumIhsg.toFixed(2)));
+      }
+    }
+    // --- SELESAI GENERASI DATA ---
+
+    // Custom Plugin untuk Crosshair Vertikal Putih Putus-putus
+    const verticalLinePlugin = {
+      id: 'verticalLine',
+      afterDraw: (chart) => {
+        if (chart.tooltip?._active?.length) {
+          const activePoint = chart.tooltip._active[0];
+          const ctx = chart.ctx;
+          const x = activePoint.element.x;
+          const topY = chart.scales.y.top;
+          const bottomY = chart.scales.y.bottom;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(x, topY);
+          ctx.lineTo(x, bottomY);
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.setLineDash([4, 4]);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    };
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'SARA AI',
+            data: saraData,
+            borderColor: '#3b82f6',
+            borderWidth: 2,
+            pointBackgroundColor: '#3b82f6',
+            pointHoverRadius: 5,
+            pointRadius: 0, // Tanpa titik saat normal
+            tension: 0.2
+          },
+          {
+            label: 'ADRO',
+            data: adroData,
+            borderColor: '#a855f7',
+            borderWidth: 1.5,
+            pointBackgroundColor: '#a855f7',
+            pointHoverRadius: 5,
+            pointRadius: 0,
+            tension: 0.2
+          },
+          {
+            label: 'IHSG',
+            data: ihsgData,
+            borderColor: '#ef4444',
+            borderWidth: 1.5,
+            pointBackgroundColor: '#ef4444',
+            pointHoverRadius: 5,
+            pointRadius: 0,
+            tension: 0.1
+          }
+        ]
+      },
+      plugins: [verticalLinePlugin],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          indexAxis: 'x',
+          intersect: false,
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            enabled: false, // Mematikan pop-up default Chart.js
+            external: function (context) {
+              const { chart, tooltip } = context;
+
+              if (tooltip.opacity === 0) {
+                tooltipEl.style.opacity = 0;
+                return;
+              }
+
+              const dataIndex = tooltip.dataPoints[0].dataIndex;
+              const currentLabel = chart.data.labels[dataIndex];
+              // Parsing label kembali untuk format tooltip yang bagus
+              const labelParts = currentLabel.split("'");
+              const fullMonthName = new Date(`${labelParts[0]} 1, 20${labelParts[1]}`).toLocaleString('id-ID', { month: 'long' });
+
+              const vSara = chart.data.datasets[0].data[dataIndex];
+              const vAdro = chart.data.datasets[1].data[dataIndex];
+              const vIhsg = chart.data.datasets[2].data[dataIndex];
+
+              // Susun struktur Box Keterangan Putih (Custom Tooltip)
+              tooltipEl.innerHTML = `
+                                <div style="font-size: 13px; font-weight: 800; margin-bottom: 8px; color: #111827;">
+                                    ${fullMonthName} 20${labelParts[1]}
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 11px; font-weight: 700;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+                                        <span style="color: #2563eb; display: flex; align-items: center; gap: 4px;">
+                                            <span style="width: 6px; height: 6px; background:#2563eb; border-radius:50%; display:inline-block;"></span>
+                                            SARA AI:
+                                        </span>
+                                        <span style="color: #000; font-weight: 800;">+${Number(vSara).toLocaleString('id-ID')}%</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding-left: 10px;">
+                                        <span style="color: #7c3aed; font-size:10px; font-weight:600;">Buy & Hold ADRO:</span>
+                                        <span style="color: #000; font-weight: 800;">+${Number(vAdro).toLocaleString('id-ID')}%</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+                                        <span style="color: #dc2626; display: flex; align-items: center; gap: 4px;">
+                                            <span style="width: 6px; height: 6px; background:#dc2626; border-radius:50%; display:inline-block;"></span>
+                                            IHSG:
+                                        </span>
+                                        <span style="color: #000; font-weight: 800;">+${Number(vIhsg).toLocaleString('id-ID')}%</span>
+                                    </div>
+                                </div>
+                            `;
+
+              const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
+              tooltipEl.style.opacity = 1;
+              // Logika posisi tooltip agar tidak terpotong di kanan
+              let posX = positionX + tooltip.caretX + 15;
+              if (posX + 200 > chart.width) { posX -= 220; } // Geser ke kiri jika mepet kanan
+
+              tooltipEl.style.left = posX + 'px';
+              tooltipEl.style.top = positionY + tooltip.caretY - 50 + 'px';
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(75, 85, 99, 0.12)', borderDash: [4, 4] },
+            ticks: {
+              color: '#9ca3af',
+              font: { size: 9 },
+              maxRotation: 0, // Label bulan tetap mendatar
+              autoSkip: true, // Sembunyikan label jika terlalu padat
+              maxTicksLimit: 12 // Tampilkan sekitar 1 label per tahun agar tidak penuh
+            }
+          },
+          y: {
+            grid: { color: 'rgba(75, 85, 99, 0.12)', borderDash: [4, 4] },
+            ticks: {
+              color: '#9ca3af',
+              font: { size: 10 },
+              callback: function (value) {
+                if (value === 0) return '-7%'; // Sesuai label di gambar
+                return value.toLocaleString('id-ID') + '%';
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
